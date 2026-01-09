@@ -1,7 +1,7 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import type { NoteTag, CreateNoteParams } from "../../types/note";
 import css from "./NoteForm.module.css";
+import type { CreateNoteParams, NoteTag } from "../../types/note";
 
 interface NoteFormProps {
   onCancel: () => void;
@@ -11,13 +11,13 @@ interface NoteFormProps {
 
 const TAGS: NoteTag[] = ["Todo", "Work", "Personal", "Meeting", "Shopping"];
 
-const schema = Yup.object({
+const validationSchema = Yup.object({
   title: Yup.string()
-    .min(3, "Min 3 characters")
-    .max(50, "Max 50 characters")
+    .min(3, "Minimum 3 characters")
+    .max(50, "Maximum 50 characters")
     .required("Required"),
-  content: Yup.string().max(500, "Max 500 characters"),
-  tag: Yup.mixed<NoteTag>().oneOf(TAGS, "Invalid tag").required("Required"),
+  content: Yup.string().max(500, "Maximum 500 characters"),
+  tag: Yup.mixed<NoteTag>().oneOf(TAGS).required("Required"),
 });
 
 const initialValues: CreateNoteParams = {
@@ -30,18 +30,29 @@ function NoteForm({ onCancel, onSubmit, isSubmitting = false }: NoteFormProps) {
   return (
     <Formik
       initialValues={initialValues}
-      validationSchema={schema}
+      validationSchema={validationSchema}
       onSubmit={(values) => onSubmit(values)}
     >
       <Form className={css.form}>
+        {/* TITLE */}
         <div className={css.formGroup}>
           <label htmlFor="title">Title</label>
+
           <Field id="title" name="title" type="text" className={css.input} />
-          <ErrorMessage name="title" component="span" className={css.error} />
+
+          <ErrorMessage name="title">
+            {(msg) => (
+              <span data-name="title" className={css.error}>
+                {msg}
+              </span>
+            )}
+          </ErrorMessage>
         </div>
 
+        {/* CONTENT */}
         <div className={css.formGroup}>
           <label htmlFor="content">Content</label>
+
           <Field
             as="textarea"
             id="content"
@@ -49,25 +60,43 @@ function NoteForm({ onCancel, onSubmit, isSubmitting = false }: NoteFormProps) {
             rows={8}
             className={css.textarea}
           />
-          <ErrorMessage name="content" component="span" className={css.error} />
+
+          <ErrorMessage name="content">
+            {(msg) => (
+              <span data-name="content" className={css.error}>
+                {msg}
+              </span>
+            )}
+          </ErrorMessage>
         </div>
 
+        {/* TAG */}
         <div className={css.formGroup}>
           <label htmlFor="tag">Tag</label>
+
           <Field as="select" id="tag" name="tag" className={css.select}>
-            {TAGS.map((t) => (
-              <option key={t} value={t}>
-                {t}
+            {TAGS.map((tag) => (
+              <option key={tag} value={tag}>
+                {tag}
               </option>
             ))}
           </Field>
-          <ErrorMessage name="tag" component="span" className={css.error} />
+
+          <ErrorMessage name="tag">
+            {(msg) => (
+              <span data-name="tag" className={css.error}>
+                {msg}
+              </span>
+            )}
+          </ErrorMessage>
         </div>
 
+        {/* ACTIONS */}
         <div className={css.actions}>
           <button type="button" className={css.cancelButton} onClick={onCancel}>
             Cancel
           </button>
+
           <button
             type="submit"
             className={css.submitButton}
