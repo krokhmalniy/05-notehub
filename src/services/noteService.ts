@@ -1,11 +1,6 @@
-// Бібліотеки
 import axios from "axios";
+import type { Note, NoteTag, CreateNoteParams } from "../types/note";
 
-// Компоненти
-import type { Note, NoteTag } from "../types/note";
-
-
-// Інтерфейси
 interface FetchNotesResponse {
   notes: Note[];
   totalPages: number;
@@ -19,19 +14,17 @@ interface FetchNotesParams {
   sortBy?: "created" | "updated";
 }
 
-interface CreateNoteParams {
-  title: string;
-  content: string;
-  tag: NoteTag;
+function getAuthHeaders() {
+  const token = import.meta.env.VITE_NOTEHUB_TOKEN as string | undefined;
+  if (!token) {
+    throw new Error("TOKEN is missing. Set VITE_NOTEHUB_TOKEN in .env");
+  }
+  return { Authorization: `Bearer ${token}` };
 }
-
-const TOKEN = import.meta.env.VITE_NOTEHUB_TOKEN;
 
 const axiosInstance = axios.create({
   baseURL: "https://notehub-public.goit.study/api",
 });
-
-axiosInstance.defaults.headers.common.Authorization = `Bearer ${TOKEN}`;
 
 export async function fetchNotes({
   page,
@@ -40,42 +33,32 @@ export async function fetchNotes({
   tag,
   sortBy,
 }: FetchNotesParams): Promise<FetchNotesResponse> {
-  if (!TOKEN) {
-    throw new Error("TOKEN is missing. Set VITE_NOTEHUB_TOKEN in .env");
-  }
+  const params = {
+    page,
+    perPage,
+    ...(search?.trim() ? { search: search.trim() } : {}),
+    ...(tag ? { tag } : {}),
+    ...(sortBy ? { sortBy } : {}),
+  };
 
-const params = {
-  page,
-  perPage,
-  ...(search?.trim() ? { search: search.trim() } : {}),
-  ...(tag ? { tag } : {}),
-  ...(sortBy ? { sortBy } : {}),
-};
-
-  console.log("FETCH PARAMS", params);
-  
   const response = await axiosInstance.get<FetchNotesResponse>("/notes", {
     params,
+    headers: getAuthHeaders(),
+  });
+
+  return response.data;
+}
+
+export async function createNote(body: CreateNoteParams): Promise<Note> {
+  const response = await axiosInstance.post<Note>("/notes", body, {
+    headers: getAuthHeaders(),
   });
   return response.data;
 }
 
-export async function createNote(
-  body: CreateNoteParams
-): Promise<FetchNotesResponse> {
-  if (!TOKEN) {
-    throw new Error("TOKEN is missing. Set VITE_NOTEHUB_TOKEN in .env");
-  }
-
-  const response = await axiosInstance.post<FetchNotesResponse>("/notes", {
-    body,
-  });
-  return response.data;
-}
-
-export async function deleteNote(id: string) {
-  const response = await axiosInstance.delete<FetchNotesResponse>("/notes", {
-    id,
+export async function deleteNote(id: string): Promise<Note> {
+  const response = await axiosInstance.delete<Note>(`/notes/${id}`, {
+    headers: getAuthHeaders(),
   });
   return response.data;
 }
