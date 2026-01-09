@@ -1,19 +1,25 @@
 // Бібліотеки
 import "modern-normalize/modern-normalize.css";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 // Стилі
 import css from "./App.module.css";
 
 // Компоненти
 import NoteList from '../NoteList/NoteList'
-import { fetchNotes, createNote, deleteNote } from "../../services/noteService";
+import { fetchNotes } from "../../services/noteService";
 
 function App() {
+
+  const [page,
+    // setPage
+  ] = useState(1);
+  const perPage = 12;
   const { data, error, isLoading, isError } = useQuery({
-    queryKey: ["search=example&tag=Todo&page=1&perPage=10&sortBy=created"],
-    queryFn: fetchNotes,
-   });
+    queryKey: ["notes", page, perPage],
+    queryFn: () => fetchNotes({ page, perPage }),
+  });
   return (
     <>
       <div className={css.app}>
@@ -22,11 +28,11 @@ function App() {
           {/* Пагінація */}
           {/* Кнопка створення нотатки */}
         </header>
-        <NoteList />
+        {data?.notes.length > 0 && <NoteList notes={data?.notes ?? []} />}
       </div>
       {/* код для прикладу */}
       {isLoading && <p>Loading...</p>}
-      {isError && <p>An error occurred: {error.message}</p>}
+      {isError && <p>An error occurred: {String(error)}</p>}
       {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
     </>
   );

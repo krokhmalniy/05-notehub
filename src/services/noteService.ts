@@ -2,34 +2,80 @@
 import axios from "axios";
 
 // Компоненти
-import type { Note } from "../types/note";
+import type { Note, NoteTag } from "../types/note";
 
-interface NotesHttpResponse {
-  total_pages: number;
-  results: Note[];
+
+// Інтерфейси
+interface FetchNotesResponse {
+  notes: Note[];
+  totalPages: number;
+}
+
+interface FetchNotesParams {
+  page: number;
+  perPage: number;
+  search?: string;
+  tag?: NoteTag;
+  sortBy?: "created" | "updated";
+}
+
+interface CreateNoteParams {
+  title: string;
+  content: string;
+  tag: NoteTag;
 }
 
 const TOKEN = import.meta.env.VITE_NOTEHUB_TOKEN;
-
 
 const axiosInstance = axios.create({
   baseURL: "https://notehub-public.goit.study/api",
 });
 
-export async function fetchNotes(): Promise<NotesHttpResponse> {
+axiosInstance.defaults.headers.common.Authorization = `Bearer ${TOKEN}`;
+
+export async function fetchNotes({
+  page,
+  perPage,
+  search,
+  tag,
+  sortBy,
+}: FetchNotesParams): Promise<FetchNotesResponse> {
   if (!TOKEN) {
     throw new Error("TOKEN is missing. Set VITE_NOTEHUB_TOKEN in .env");
   }
 
-  const response = await axiosInstance.get<NotesHttpResponse>("/notes", {
-    // params: { query, page },
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-    },
+const params = {
+  page,
+  perPage,
+  ...(search?.trim() ? { search: search.trim() } : {}),
+  ...(tag ? { tag } : {}),
+  ...(sortBy ? { sortBy } : {}),
+};
+
+  console.log("FETCH PARAMS", params);
+  
+  const response = await axiosInstance.get<FetchNotesResponse>("/notes", {
+    params,
   });
   return response.data;
 }
 
-export async function createNote() {}
+export async function createNote(
+  body: CreateNoteParams
+): Promise<FetchNotesResponse> {
+  if (!TOKEN) {
+    throw new Error("TOKEN is missing. Set VITE_NOTEHUB_TOKEN in .env");
+  }
 
-export async function deleteNote() {}
+  const response = await axiosInstance.post<FetchNotesResponse>("/notes", {
+    body,
+  });
+  return response.data;
+}
+
+export async function deleteNote(id: string) {
+  const response = await axiosInstance.delete<FetchNotesResponse>("/notes", {
+    id,
+  });
+  return response.data;
+}
