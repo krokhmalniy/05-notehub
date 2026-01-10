@@ -15,7 +15,7 @@ interface FetchNotesParams {
 }
 
 function getAuthHeaders() {
-  const token = import.meta.env.VITE_NOTEHUB_TOKEN as string | undefined;
+  const token = import.meta.env.VITE_NOTEHUB_TOKEN;
   if (!token) {
     throw new Error("TOKEN is missing. Set VITE_NOTEHUB_TOKEN in .env");
   }

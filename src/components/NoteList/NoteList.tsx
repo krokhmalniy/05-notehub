@@ -26,7 +26,6 @@ function NoteList({ notes }: NoteListProps) {
 
           <div className={css.footer}>
             <span className={css.tag}>{note.tag}</span>
-
             <button
               className={css.button}
               type="button"

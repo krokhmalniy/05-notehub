@@ -7,7 +7,7 @@ import type { CreateNoteParams, NoteTag } from "../../types/note";
 import { createNote } from "../../services/noteService";
 
 interface NoteFormProps {
-  onCancel: () => void; // закрити модалку
+  onCancel: () => void;
 }
 
 const TAGS: NoteTag[] = ["Todo", "Work", "Personal", "Meeting", "Shopping"];
@@ -34,7 +34,7 @@ function NoteForm({ onCancel }: NoteFormProps) {
     mutationFn: (values: CreateNoteParams) => createNote(values),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["notes"] });
-      onCancel(); // закрити модалку після успіху
+      onCancel();
     },
   });
 
@@ -45,12 +45,9 @@ function NoteForm({ onCancel }: NoteFormProps) {
       onSubmit={(values) => mutation.mutate(values)}
     >
       <Form className={css.form}>
-        {/* TITLE */}
         <div className={css.formGroup}>
           <label htmlFor="title">Title</label>
-
           <Field id="title" name="title" type="text" className={css.input} />
-
           <ErrorMessage name="title">
             {(msg) => (
               <span data-name="title" className={css.error}>
@@ -60,10 +57,8 @@ function NoteForm({ onCancel }: NoteFormProps) {
           </ErrorMessage>
         </div>
 
-        {/* CONTENT */}
         <div className={css.formGroup}>
           <label htmlFor="content">Content</label>
-
           <Field
             as="textarea"
             id="content"
@@ -71,7 +66,6 @@ function NoteForm({ onCancel }: NoteFormProps) {
             rows={8}
             className={css.textarea}
           />
-
           <ErrorMessage name="content">
             {(msg) => (
               <span data-name="content" className={css.error}>
@@ -81,10 +75,8 @@ function NoteForm({ onCancel }: NoteFormProps) {
           </ErrorMessage>
         </div>
 
-        {/* TAG */}
         <div className={css.formGroup}>
           <label htmlFor="tag">Tag</label>
-
           <Field as="select" id="tag" name="tag" className={css.select}>
             {TAGS.map((tag) => (
               <option key={tag} value={tag}>
@@ -92,7 +84,6 @@ function NoteForm({ onCancel }: NoteFormProps) {
               </option>
             ))}
           </Field>
-
           <ErrorMessage name="tag">
             {(msg) => (
               <span data-name="tag" className={css.error}>
@@ -102,7 +93,6 @@ function NoteForm({ onCancel }: NoteFormProps) {
           </ErrorMessage>
         </div>
 
-        {/* ACTIONS */}
         <div className={css.actions}>
           <button
             type="button"
